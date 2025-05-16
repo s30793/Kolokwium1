@@ -1,35 +1,81 @@
-﻿namespace Kolokwium1.Services;
+﻿using Microsoft.AspNetCore.Http.HttpResults;
+
+namespace Kolokwium1.Services;
 using Kolokwium1.Models.DTOs;
 using Microsoft.Data.SqlClient;
+using System.Data.Common;
 
-public class xService : I_x_Service
+public class DbService : IDbService
 {
     private readonly string _connectionString;
-    
-    public xService(IConfiguration configuration)
+
+    public DbService(IConfiguration configuration)
     {
         _connectionString = configuration.GetConnectionString("Default") ?? string.Empty;
     }
-    
-                        //                                  //
-    public async Task<CustomerRentalHistoryDto> Get_x(int customerId)
+
+    //                                  //
+    public async Task<AppointmentDetailsDto> GetAppointmentAsyc()
     {
-        var query = 
-        await using SqlConnection conn = new SqlConnection(_connectionString);
+        var results = new List<AppointmentDetailsDto>();
+        var query = @"Select p.patient_id, p.first_name,p.last_name," +
+                    "p.date_of_birth, d.doctor_id, d.PWZ, s.name,aps.service_fee from Patients p " +
+                    "JOIN Appointment a ON p.patient_id = a.patient_id " +
+                    "JOIN Doctor d ON d.doctor_id = a.doctor_id " +
+                    "JOIN Appointment_Service aps ON a.appointment_id = aps.appointment_id " +
+                    "JOIN Service s ON s.service_id =aps.service_id";
+
+        await using SqlConnection connection = new SqlConnection(_connectionString);
         await using SqlCommand com = new SqlCommand();
-        
-        com.Connection = conn;
+        com.Connection = connection;
         com.CommandText = query;
-        await conn.OpenAsync();
+        await connection.OpenAsync();
+
+        // com.Parameters.AddWithValue("@patientId", patientId);
+        var reader = await com.ExecuteReaderAsync();
+        AppointmentDetailsDto? app = null;
+
+        while (await reader.ReadAsync())
+        {
+            if (app == null)
+                results.Add(new AppointmentDetailsDto
+                {
+                    date = reader.GetDateTime(0),
+                    patient = new List<PatientDto>(),
+                    doctor = new List<DoctorDto>(),
+                    appointmentServices = new List<AppointmentServicesDto>()
+
+                });
+            await reader.CloseAsync();
+        }
+
+        return app;
     }
 
-    public async Task AddNewRentalAsync(int customerId, CreateRentalRequestDto rentalRequest)
+    public Task<AppointmentDetailsDto> GetAppointmentAsync()
+    {
+        return GetAppointmentAsyc();
+    }
+
+    public async Task<AppointmentDetailsDto> AddAppointmentAsync(int patientId, AppointmentDetailsDto dto)
     {
 
-        await using SqlConnection conn = new SqlConnection(_connectionString);
-        await using SqlCommand com = new SqlCommand();
+        await using SqlConnection connection = new SqlConnection(_connectionString);
+        await using SqlCommand command = new SqlCommand();
 
-        com.Connection = conn;
-        await conn.OpenAsync();
+        command.Connection = connection;
+        await connection.OpenAsync();
+
+        DbTransaction transaction = await connection.BeginTransactionAsync();
+        command.Transaction = transaction as SqlTransaction;
+
+        command.Parameters.AddWithValue("@patientId", patientId);
+
+        command.Parameters.AddWithValue("@StatusId", 1);
+
+
+//
+        return null;
 
     }
+}

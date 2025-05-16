@@ -7,11 +7,11 @@ using Microsoft.AspNetCore.Mvc;
 
     [Route("api/[controller]")]
     [ApiController]
-    public class xController : ControllerBase
+    public class AppointmentsController : ControllerBase
     {
-        private readonly I_x_Service _dbService;
+        private readonly IDbService _dbService;
 
-        public xController(I_x_Service dbService)
+        public AppointmentsController(IDbService dbService)
         {
             _dbService = dbService;
         }
@@ -19,18 +19,18 @@ using Microsoft.AspNetCore.Mvc;
     
     
     
-    [HttpGet("{id}/rentals")]           //
-    public async Task<IActionResult> Get_x(int id)
+    /*
+    [HttpGet("appointments/{id}")]           
+    public async Task<IActionResult> GetAllPatients(int id)
     {
-        var result = await _dbService.GetPolitycyAsync();
+        var result = await _dbService.GetPatientsAsync(id);
         return Ok(result);
     }
 
 
-    [HttpPost("{id}/rentals")]      //
-    public async Task<IActionResult> Add_x(int id, CreateRentalRequestDto createRentalRequest)
+    [HttpPost("appointments")]     
+    public async Task<IActionResult> AddAppointment(int id, AppointmentDetailsDto dto)
     {
-        var result = await _dbService.CreatePartiaAsync(dto);
-        return CreatedAtAction(nameof(GetAll), new { id = result.PartiaId }, result);
-    }
-    }
+      
+    }*/
+    

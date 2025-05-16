@@ -2,11 +2,8 @@
 
 using Kolokwium1.Models.DTOs;
 
-public class I_x_Service
-{
     public interface IDbService
     {
-        Task<CustomerRentalHistoryDto> GetRentalsForCustomerByIdAsync(int customerId);
-        Task AddNewRentalAsync(int customerId, CreateRentalRequestDto rentalRequest);
+        Task<AppointmentDetailsDto> GetAppointmentAsync();
+        Task<AppointmentDetailsDto> AddAppointmentAsync(int patientId, AppointmentDetailsDto appointment );
     }
-}
